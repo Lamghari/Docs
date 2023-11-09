@@ -1,0 +1,1 @@
+Dans le cadre de la refonte des collectes de données Retail du groupe ADP, il a été décidé de fusionner plusieurs outils existants en un seul, afin de simplifier, et d’unifier le schéma de données, et l’intégration de nos partenaires.
