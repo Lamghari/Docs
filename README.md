@@ -1,15 +1,14 @@
-Développeur C# .NET avec plus de 6 années d'expérience, ma passion pour les nouvelles technologies a guidé mes différentes expériences professionnelles. 
-En tant que développeur C# .NET, j'ai contribué à la réalisation de nombreux projets dans divers domaines. Familiarisé avec le travail en équipe et la méthodologie agile, je suis prêt à mettre à profit mes connaissances pour garantir le succès de votre projet.
 
-
-
-
+using System;
 using System.IO;
+using System.IO.Compression;
+using System.Net;
+using System.Net.Mail;
 using Microsoft.Maui.Essentials;
 
 // ...
 
-void GetScreenshotsFromMediaDirectory()
+void ZipScreenshotsAndSendEmail()
 {
     try
     {
@@ -22,11 +21,48 @@ void GetScreenshotsFromMediaDirectory()
             // Retrieve all screenshot files in the directory
             string[] screenshotFiles = Directory.GetFiles(screenshotsDirectoryPath, "*.png");
 
-            // Process each screenshot file
+            // Create a temporary zip file
+            string zipFilePath = Path.Combine(screenshotsDirectoryPath, "Screenshots.zip");
+
+            // Zip the screenshots
+            using (ZipArchive zipArchive = ZipFile.Open(zipFilePath, ZipArchiveMode.Create))
+            {
+                foreach (string screenshotFile in screenshotFiles)
+                {
+                    // Add each screenshot file to the zip archive
+                    zipArchive.CreateEntryFromFile(screenshotFile, Path.GetFileName(screenshotFile));
+                }
+            }
+
+            // Email configuration
+            string senderEmail = "your_email@gmail.com";
+            string recipientEmail = "recipient_email@example.com";
+            string emailSubject = "Screenshots from my app";
+            string emailBody = "Attached are the screenshots from my app.";
+
+            // Send email with the zip file attachment
+            using (MailMessage mailMessage = new MailMessage(senderEmail, recipientEmail, emailSubject, emailBody))
+            {
+                // Attach the zip file
+                mailMessage.Attachments.Add(new Attachment(zipFilePath));
+
+                // Configure SMTP client (replace with your email server details)
+                SmtpClient smtpClient = new SmtpClient("smtp.gmail.com")
+                {
+                    Port = 587,
+                    Credentials = new NetworkCredential(senderEmail, "your_email_password"),
+                    EnableSsl = true,
+                };
+
+                // Send the email
+                smtpClient.Send(mailMessage);
+            }
+
+            // Delete the zip file and screenshots
+            File.Delete(zipFilePath);
             foreach (string screenshotFile in screenshotFiles)
             {
-                // Perform actions on each screenshot file, such as displaying or processing
-                Console.WriteLine($"Found screenshot: {screenshotFile}");
+                File.Delete(screenshotFile);
             }
         }
         else
@@ -41,7 +77,4 @@ void GetScreenshotsFromMediaDirectory()
         Console.WriteLine($"Error: {ex.Message}");
     }
 }
-
-
-
 
