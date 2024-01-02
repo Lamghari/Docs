@@ -78,3 +78,63 @@ void ZipScreenshotsAndSendEmail()
     }
 }
 
+
+
+
+
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Maui.Controls;
+using Xamarin.Essentials;
+
+namespace YourNamespace
+{
+    public partial class MainPage : ContentPage
+    {
+        private Timer screenshotDetectionTimer;
+
+        public MainPage()
+        {
+            InitializeComponent();
+
+            // Initialize and start the timer to periodically check for screenshots
+            screenshotDetectionTimer = new Timer(CheckForScreenshots, null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
+        }
+
+        private async void CheckForScreenshots(object state)
+        {
+            try
+            {
+                // Query the MediaStore for new images
+                var recentImages = await MediaPicker.PickMultiplePhotosAsync(new PickMediaOptions
+                {
+                    PresentationSourceBounds = System.Drawing.Rectangle.Empty,
+                    ModalPresentationStyle = MediaPickerModalPresentationStyle.OverFullScreen
+                });
+
+                if (recentImages != null && recentImages.Count > 0)
+                {
+                    // Check if the latest image matches the pattern used for screenshots
+                    var latestImage = recentImages[recentImages.Count - 1];
+                    if (IsScreenshot(latestImage))
+                    {
+                        // Display a message or perform any action when a screenshot is detected
+                        Console.WriteLine("Screenshot taken!");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception: {ex.Message}");
+            }
+        }
+
+        private bool IsScreenshot(FileResult fileResult)
+        {
+            // You may need to customize this logic based on how your device names screenshot files.
+            return fileResult.FullPath.ToLowerInvariant().Contains("screenshot");
+        }
+    }
+}
